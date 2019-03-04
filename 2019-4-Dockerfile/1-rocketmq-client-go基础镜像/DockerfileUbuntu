@@ -1,0 +1,44 @@
+FROM ubuntu:14.04
+
+RUN set -eux; \
+	yum install -y \
+                wget \
+		bash \
+		gcc \
+		musl-dev \
+		openssl \
+		go 
+COPY go1.12.src.tar.gz go.tgz
+COPY go1.4-bootstrap-20171003.tar.gz go1.4.tgz
+RUN tar -zxvf go1.4.tgz
+RUN mv go /root/go1.4
+WORKDIR /root/go1.4/src
+RUN ./all.bash; exit 0
+WORKDIR /
+RUN tar -xzf go.tgz
+RUN mv go /usr/local/go
+
+RUN set -eux; \
+        cd /usr/local/go/src; \
+	./make.bash; \
+	\
+	rm -rf \
+		/usr/local/go/pkg/bootstrap \
+		/usr/local/go/pkg/obj \
+	; \
+	export PATH="/usr/local/go/bin:$PATH"; \
+	go version
+ENV GOLANG_VERSION 1.12
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+WORKDIR $GOPATH
+
+RUN mkdir -p /usr/local/include/rocketmq/
+COPY rocketmq-client-cpp/include /usr/local/include/rocketmq
+WORKDIR /root
+COPY rocketmq-client-cpp rocketmq-client-cpp
+#WORKDIR $GOPATH
+
