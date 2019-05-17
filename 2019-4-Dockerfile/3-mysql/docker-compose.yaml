@@ -1,0 +1,9 @@
+version: "3.3"
+services:
+  db:
+    image: sli4-mysql:5.7-1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'stark'
+    ports:
+      - '3306:3306'
